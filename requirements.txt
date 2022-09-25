@@ -6,3 +6,4 @@ timm
 transformers
 opencv-python
 python-multipart
+torch
