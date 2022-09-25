@@ -1,12 +1,15 @@
-import uuid
-from fastapi import FastAPI, UploadFile
+import json
+import logging
 import os
+import uuid
+from logging.config import dictConfig
+
+from aleph_alpha_client import AlephAlphaClient, AlephAlphaModel, Document, ImagePrompt, QaRequest
+from dotenv import dotenv_values
+from fastapi import FastAPI, UploadFile
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from dotenv import dotenv_values
-from aleph_alpha_client import AlephAlphaClient, AlephAlphaModel, QaRequest, Document, ImagePrompt
-from logging.config import dictConfig
-import logging
+
 from config import LogConfig
 from detection import detect_video
 
@@ -17,6 +20,7 @@ app = FastAPI(debug=True)
 
 # create tmp folder.
 os.makedirs("tmp_raw", exist_ok=True)
+os.makedirs("tmp_img", exist_ok=True)
 os.makedirs("tmp_processed", exist_ok=True)
 os.makedirs("tmp_dict", exist_ok=True)
 
@@ -77,7 +81,8 @@ def nlp(request: NLPRequest):
 
 
 @app.post("/multimodal")
-async def multimodal(request: MultimodalRequest):
+# async def multimodal(request: MultimodalRequest):
+async def multimodal(file: UploadFile):
     """Api endpoint for multimodal requests, which will be parsed and redirected to the aleph alpha API.
 
     :param request: Request containing the image and the question.
@@ -86,18 +91,25 @@ async def multimodal(request: MultimodalRequest):
     :rtype: str
     """
     logger.info("Starting Multimodal Request")
-
+    logger.info("Saving file locally.")
+    id = str(uuid.uuid4())
+    # save file locally.
+    file_path = f"tmp_img/{id}.{file.filename.split('.')[-1]}"
+    with open(file_path, "wb") as buffer:
+        buffer.write(file.file.read())
     model = AlephAlphaModel(
         AlephAlphaClient(host="https://api.aleph-alpha.com", token=config["token"]),
         # You need to choose a model with qa support for this example.
         model_name="luminous-extended",
     )
-    img = str.encode(request.img)
-    img = ImagePrompt.from_bytes(img)
+    # img = str.encode(request.img)
+    # img = ImagePrompt.from_bytes(img)
+    img = ImagePrompt.from_file(file_path)
     prompt = [img]
     document = Document.from_prompt(prompt)
     logger.info("Convertion sucessful.")
-    request = QaRequest(query=request.question, documents=[document])
+    # request = QaRequest(query=request.question, documents=[document])
+    request = QaRequest(query="Q: What is in the Picture? A:", documents=[document])
     logger.info("Sending Request to Aleph Alpha.")
     result = model.qa(request)
     logger.info("Request sucessful.", result)
@@ -164,3 +176,30 @@ async def get_detected_classes(id: str):
     """
     with open(f"tmp_dict/{id}.json", "r") as f:
         return f.read()
+
+
+# get frame with the most detected objects.
+@app.get("/detection_frame/{id}")
+async def get_detected_frame(id: str):
+    """Get the frame with the most detected objects.
+
+    :param id: uuid
+    :type id: str
+    :return: image with the most detected objects.
+    :rtype: FileResponse
+    """
+    with open(f"tmp_dict/{id}.json", "r") as f:
+        file = f.read()
+
+    file = json.loads(file)
+    lenght = 0
+    frame = 0
+
+    for key in file:
+        lx = len(file[key]["detection_class"])
+        if lx > lenght:
+            lenght = lx
+            # get the key
+            frame = key
+
+    return frame

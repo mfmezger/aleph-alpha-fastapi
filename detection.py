@@ -1,15 +1,23 @@
-from transformers import DetrFeatureExtractor, DetrForObjectDetection
-import torch
-from PIL import Image
-import numpy as np
-import cv2
 import copy
+import json
+import logging
+from logging.config import dictConfig
+
+import cv2
+from PIL import Image
+from transformers import DetrFeatureExtractor, DetrForObjectDetection
+
+from config import LogConfig
+
+dictConfig(LogConfig().dict())
+logger = logging.getLogger("client")
 
 
 def draw_on_image(results, img, model, score_confidence=0.9, debugging=False):
-    color = list(np.random.random(size=3) * 256)
+    color = [100, 128, 0]
     # save detection and time stamp
     detection_class = []
+    prob = []
     for score, label, box in zip(results["scores"], results["labels"], results["boxes"]):
         box = [round(i, 2) for i in box.tolist()]
         # let's only keep detections with score > 0.9
@@ -29,8 +37,9 @@ def draw_on_image(results, img, model, score_confidence=0.9, debugging=False):
                 lineType=cv2.LINE_4,
             )
             detection_class.append(model.config.id2label[label.item()])
+            prob.append(round(score.item(), 3))
 
-    return img, detection_class
+    return img, detection_class, prob
 
 
 def get_classes_in_image(path_to_image):
@@ -64,6 +73,8 @@ def detect_video(path_to_video, save_path, dict_path):
     # initialize the model.
     feature_extractor = DetrFeatureExtractor.from_pretrained("facebook/detr-resnet-50")
     model = DetrForObjectDetection.from_pretrained("facebook/detr-resnet-50")
+    # feature_extractor = YolosFeatureExtractor.from_pretrained('hustvl/yolos-tiny')
+    # model = YolosForObjectDetection.from_pretrained('hustvl/yolos-tiny')
 
     # initialize video with detection bounding boxes.
     codec = cv2.VideoWriter_fourcc("m", "p", "4", "v")
@@ -72,11 +83,12 @@ def detect_video(path_to_video, save_path, dict_path):
     output_video = cv2.VideoWriter(save_path, codec, fps, (width, height))
 
     detections = {}
-
+    logger.info("Starting Predicitons.")
     # Check if camera opened successfully
     if cap.isOpened() == False:
         print("Error opening video stream or file")
     frame = 0
+    results_dict = {}
     # Read until video is completed
     while cap.isOpened():
         # Capture frame-by-frame
@@ -88,15 +100,18 @@ def detect_video(path_to_video, save_path, dict_path):
 
             inputs = feature_extractor(images=image, return_tensors="pt")
             outputs = model(**inputs)
-            # convert outputs (bounding boxes and class logits) to COCO API
+            # detaching all of the outputs
             target_sizes = torch.tensor([image.size[::-1]])
             results = feature_extractor.post_process(outputs, target_sizes=target_sizes)[0]
-
-            # draw on image.
-            img, detection_class = draw_on_image(results, img, model)
+            outputs = {k: v.detach().cpu() for k, v in outputs.items()}
+            img, detection_class, prob = draw_on_image(results, img, model, debugging=False)
             output_video.write(img)
-            detections[frame] = detection_class
+            # store prob and detection_class with frame in dict.
+            detections[frame] = {"detection_class": detection_class, "prob": prob}
+
+            # convert outputs (bounding boxes and class logits) to COCO API
             frame += 1
+            results_dict[frame] = results
 
         # Break the loop
         else:
@@ -104,33 +119,47 @@ def detect_video(path_to_video, save_path, dict_path):
 
     # When everything done, release the video capture object
     cap.release()
-    output_video.release()
+    # # draw results.
+    # cap = cv2.VideoCapture(path_to_video)
+    # while cap.isOpened():
+    #     # Capture frame-by-frame
+    #     ret, image = cap.read()
+    #     if ret == True:
+    #         results = results_dict[frame]
 
-    # save detections in dict_path.
+    #         img, detection_class, prob = draw_on_image(results, image, model, debugging=False)
+    #         output_video.write(img)
+    #         # store prob and detection_class with frame in dict.
+    #         detections[frame] = {"detection_class": detection_class, "prob": prob}
+
+    output_video.release()
+    logger.info("Writing Results to File.")
+
+    # convert dict to json.
     with open(dict_path, "w") as f:
-        f.write(str(detections))
-        f.close()
+        json.dump(detections, f)
 
     # Closes all the frames
     cv2.destroyAllWindows()
 
 
 def main():
-    path_to_image = "cat.jpg"
+    # path_to_image = "cat.jpg"
 
-    image = Image.open(path_to_image)
-    image = image.convert("RGB")
+    # image = Image.open(path_to_image)
+    # image = image.convert("RGB")
 
-    img = cv2.imread(path_to_image)
-    # draw on image.
-    img = get_classes_in_image(path_to_image)
+    # img = cv2.imread(path_to_image)
+    # # draw on image.
+    # img = get_classes_in_image(path_to_image)
 
-    cv2.imwrite("cat_detected.jpg", img)
+    # cv2.imwrite("cat_detected.jpg", img)
 
-    # # save image
-    # path_to_video = "Arxiepiskopi_flock.avi"
-    # save_path = "Arxiepiskopi_flock_detected.avi"
-    # detect_video(path_to_video, save_path)
+    # save image
+    path_to_video = "very_short.mp4"
+    save_path = "very_short_detected.mp4"
+    dict_path = "tmp_dict/tst.json"
+    detect_video(path_to_video, save_path, dict_path)
 
 
 if __name__ == "__main__":
