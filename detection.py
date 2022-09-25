@@ -88,7 +88,7 @@ def detect_video(path_to_video, save_path, dict_path):
     if cap.isOpened() == False:
         print("Error opening video stream or file")
     frame = 0
-    results_dict = {}
+    # results_dict = {}
     # Read until video is completed
     while cap.isOpened():
         # Capture frame-by-frame
@@ -109,9 +109,11 @@ def detect_video(path_to_video, save_path, dict_path):
             # store prob and detection_class with frame in dict.
             detections[frame] = {"detection_class": detection_class, "prob": prob}
 
+            del img, detection_class, prob, image, inputs, outputs, results
+
             # convert outputs (bounding boxes and class logits) to COCO API
             frame += 1
-            results_dict[frame] = results
+            # results_dict[frame] = results
 
         # Break the loop
         else:
