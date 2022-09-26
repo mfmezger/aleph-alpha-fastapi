@@ -136,4 +136,6 @@ dmypy.json
 *.avi
 /tmp_processed
 /tmp_raw
+/tmp_dict
+*.csv
 *.json

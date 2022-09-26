@@ -175,7 +175,24 @@ async def get_detected_classes(id: str):
     :rtype: dict
     """
     with open(f"tmp_dict/{id}.json", "r") as f:
-        return f.read()
+        data = f.read()
+    
+    df = pd.DataFrame( columns=["index", 'frame', 'detection_class', 'detection_score'])
+    y = 0
+    for d in data:
+        # save number
+        number = d
+        detections = data[number]["detection_class"] 
+        prob = data[d]["prob"]
+        for x in detections:
+            for p in prob:
+
+                df.loc[y] =  [y, number, x, p]
+                y+=1
+
+    # change to json.
+    return df.to_json(orient="records")
+
 
 
 # get frame with the most detected objects.
