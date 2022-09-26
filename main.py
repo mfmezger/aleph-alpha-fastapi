@@ -13,9 +13,12 @@ from pydantic import BaseModel
 from config import LogConfig
 from detection import detect_video
 
+# initialize the Logging.
 dictConfig(LogConfig().dict())
 logger = logging.getLogger("client")
 config = dotenv_values(".env")
+
+# initialize the Fast API Application.
 app = FastAPI(debug=True)
 
 # create tmp folder.
@@ -28,11 +31,21 @@ logger.info("Starting Backend Service")
 
 
 class NLPRequest(BaseModel):
+    """Using to standardize the NLP Request
+
+    :param BaseModel: Pydantic BaseModel
+    :type BaseModel: pydantic.BaseModel
+    """
     question: str
     memory: str
 
 
 class MultimodalRequest(BaseModel):
+    """Using to standardize the Multimodel Request
+
+    :param BaseModel: Pydantic BaseModel
+    :type BaseModel: pydantic.BaseModel
+    """
     img: str
     question: str
 
@@ -192,7 +205,6 @@ async def get_detected_classes(id: str):
 
     # change to json.
     return df.to_json(orient="records")
-
 
 
 # get frame with the most detected objects.
