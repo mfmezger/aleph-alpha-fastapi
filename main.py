@@ -9,9 +9,10 @@ from dotenv import dotenv_values
 from fastapi import FastAPI, UploadFile
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
+import pandas as pd
 
 from config import LogConfig
-from detection import detect_video
+from detection import detect_video, detect_single_image
 
 # initialize the Logging.
 dictConfig(LogConfig().dict())
@@ -36,6 +37,7 @@ class NLPRequest(BaseModel):
     :param BaseModel: Pydantic BaseModel
     :type BaseModel: pydantic.BaseModel
     """
+
     question: str
     memory: str
 
@@ -46,6 +48,7 @@ class MultimodalRequest(BaseModel):
     :param BaseModel: Pydantic BaseModel
     :type BaseModel: pydantic.BaseModel
     """
+
     img: str
     question: str
 
@@ -131,6 +134,32 @@ async def multimodal(file: UploadFile):
     return result
 
 
+# detect image.
+@app.post("/detect_image")
+async def detect_image(file: UploadFile):
+    # get the image and save it locally.
+    logger.info("Saving file locally.")
+    id = str(uuid.uuid4())
+    file_path = f"tmp_raw/{id}.{file.filename.split('.')[-1]}"
+    save_path = f"tmp_processed/{id}.{file.filename.split('.')[-1]}"
+    dict_path = f"tmp_dict/{id}.json"
+
+    with open(file_path, "wb") as buffer:
+        buffer.write(file.file.read())
+
+    # call the service to detect the video.
+    try:
+        detect_single_image(file_path, save_path, dict_path)
+        logger.info("Video processed.")
+
+    except Exception as e:
+        logger.error("Error processing video.", e)
+        return {"error": "Error processing video."}
+
+    # return the image id.
+    return id
+
+
 # object detection request.
 @app.post("/detection_video")
 async def detection_video(file: UploadFile):
@@ -164,6 +193,14 @@ async def detection_video(file: UploadFile):
     return id
 
 
+# service to speech to text.
+@app.get("/speech_to_text/{id}")
+def speech_to_text(file: UploadFile):
+    # get the sound data and save it locally.
+    logger.info("Saving file locally.")
+    id = str(uuid.uuid4())
+
+
 # get detected video.
 @app.get("/detection_video/{id}")
 async def get_detected_video(id: str):
@@ -189,19 +226,20 @@ async def get_detected_classes(id: str):
     """
     with open(f"tmp_dict/{id}.json", "r") as f:
         data = f.read()
-    
-    df = pd.DataFrame( columns=["index", 'frame', 'detection_class', 'detection_score'])
+
+    data = json.loads(data)
+    df = pd.DataFrame(columns=["index", "frame", "detection_class", "detection_score"])
     y = 0
     for d in data:
         # save number
         number = d
-        detections = data[number]["detection_class"] 
+        detections = data[number]["detection_class"]
         prob = data[d]["prob"]
         for x in detections:
             for p in prob:
 
-                df.loc[y] =  [y, number, x, p]
-                y+=1
+                df.loc[y] = [y, number, x, p]
+                y += 1
 
     # change to json.
     return df.to_json(orient="records")

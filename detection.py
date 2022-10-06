@@ -10,6 +10,7 @@ from transformers import DetrFeatureExtractor, DetrForObjectDetection
 
 from config import LogConfig
 
+
 """Initializing the logger."""
 dictConfig(LogConfig().dict())
 logger = logging.getLogger("client")
@@ -61,15 +62,22 @@ def draw_on_image(results, img, model, score_confidence=0.9, debugging=False):
     return img, detection_class, prob
 
 
-def get_classes_in_image(path_to_image):
+def speech_to_text(path_to_sound):
+    """Converts the sound of the video to text
+
+    :param path_to_video: Path to the video
+    :type path_to_video: str
+    :return: the text from the video
+    :rtype: str
+    """
+    pass
+
+
+def detect_single_image(path_to_image, save_path, dict_path):
     """Run a forward pass of the model on the image
-
-
 
     :param path_to_image: Parth to the image in the temporary folder
     :type path_to_image: str
-    :return: img with the bounding boxes drawn on it
-    :rtype: cv2.Image
     """
     image = Image.open(path_to_image)
     image = image.convert("RGB")
@@ -87,9 +95,16 @@ def get_classes_in_image(path_to_image):
     img = cv2.imread(path_to_image)
 
     # draw on image.
-    img = draw_on_image(results, img, model)
+    img, detection_class, prob = draw_on_image(results, img, model)
+    detections = {}
+    detections[0] = {"detection_class": detection_class, "prob": prob}
 
-    return img
+    # convert dict to json.
+    with open(dict_path, "w") as f:
+        json.dump(detections, f)
+
+    # save the image to the tmp_img folder.
+    cv2.imwrite(save_path, img)
 
 
 def detect_video(path_to_video, save_path, dict_path):
