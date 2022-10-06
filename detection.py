@@ -4,16 +4,35 @@ import logging
 from logging.config import dictConfig
 
 import cv2
+import torch
 from PIL import Image
 from transformers import DetrFeatureExtractor, DetrForObjectDetection
 
 from config import LogConfig
 
+"""Initializing the logger."""
 dictConfig(LogConfig().dict())
 logger = logging.getLogger("client")
 
 
 def draw_on_image(results, img, model, score_confidence=0.9, debugging=False):
+    """Draws the bounding boxes on the image
+
+    # future: check if speedup is possible / need for profiling.
+
+    :param results: the results from the model
+    :type results: dict of tensors
+    :param img: the image to draw on
+    :type img: cv2.Image
+    :param model: the model
+    :type model: model
+    :param score_confidence: The confidence score that the model should reach to display the predictions, defaults to 0.9
+    :type score_confidence: float, optional
+    :param debugging: Debugging Mode with more prints, defaults to False
+    :type debugging: bool, optional
+    :return: the image with the bounding boxes drawn on it, the detection class, and the probability
+    :rtype: cv2.Image, list, list
+    """
     color = [100, 128, 0]
     # save detection and time stamp
     detection_class = []
@@ -43,6 +62,15 @@ def draw_on_image(results, img, model, score_confidence=0.9, debugging=False):
 
 
 def get_classes_in_image(path_to_image):
+    """Run a forward pass of the model on the image
+
+
+
+    :param path_to_image: Parth to the image in the temporary folder
+    :type path_to_image: str
+    :return: img with the bounding boxes drawn on it
+    :rtype: cv2.Image
+    """
     image = Image.open(path_to_image)
     image = image.convert("RGB")
 
@@ -65,6 +93,15 @@ def get_classes_in_image(path_to_image):
 
 
 def detect_video(path_to_video, save_path, dict_path):
+    """Loop over the video and detect the classes in the video, then draw onto the image and save it to a new video.
+
+    :param path_to_video: Path to the video
+    :type path_to_video: str
+    :param save_path: Path to save the video
+    :type save_path: str
+    :param dict_path: Path to save the json file
+    :type dict_path: str
+    """
 
     # Create a VideoCapture object and read from input file
     # If the input is the camera, pass 0 instead of the video file name
@@ -73,8 +110,6 @@ def detect_video(path_to_video, save_path, dict_path):
     # initialize the model.
     feature_extractor = DetrFeatureExtractor.from_pretrained("facebook/detr-resnet-50")
     model = DetrForObjectDetection.from_pretrained("facebook/detr-resnet-50")
-    # feature_extractor = YolosFeatureExtractor.from_pretrained('hustvl/yolos-tiny')
-    # model = YolosForObjectDetection.from_pretrained('hustvl/yolos-tiny')
 
     # initialize video with detection bounding boxes.
     codec = cv2.VideoWriter_fourcc("m", "p", "4", "v")
@@ -115,7 +150,7 @@ def detect_video(path_to_video, save_path, dict_path):
             frame += 1
             # results_dict[frame] = results
 
-        # Break the loop
+        # Break the loop if there are no more frames.
         else:
             break
 
@@ -146,6 +181,7 @@ def detect_video(path_to_video, save_path, dict_path):
 
 
 def main():
+    """Main to test the functions."""
     # path_to_image = "cat.jpg"
 
     # image = Image.open(path_to_image)
@@ -158,9 +194,9 @@ def main():
     # cv2.imwrite("cat_detected.jpg", img)
 
     # save image
-    path_to_video = "very_short.mp4"
-    save_path = "very_short_detected.mp4"
-    dict_path = "tmp_dict/tst.json"
+    path_to_video = "video.mp4"
+    save_path = "maverik.mp4"
+    dict_path = "tmp_dict/mav.json"
     detect_video(path_to_video, save_path, dict_path)
 
 
