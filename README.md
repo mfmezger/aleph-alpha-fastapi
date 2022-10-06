@@ -30,3 +30,10 @@ Only necessary for Development
 
 ## Using OpenAPI GUI
 After installation one can start the server and use the OpenAPI GUI to test the API. The GUI is available at ```localhost:8000/docs```. The GUI allows to test the API and to see the API documentation.
+
+If you open a Request press on try it out to test the service with your own data.
+![fastapi](ressources/fastapi.png?raw=true "FastAPI Doc GUI")
+
+After Selecting a Image you can press on execute to get the result.
+![](ressources/execute.png?raw=true "Title")
+The result is a UUID that can be used to get the video and detections with other requests.
