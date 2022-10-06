@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import uuid
+import glob
 from logging.config import dictConfig
 
 from aleph_alpha_client import AlephAlphaClient, AlephAlphaModel, Document, ImagePrompt, QaRequest
@@ -202,8 +203,8 @@ def speech_to_text(file: UploadFile):
 
 
 # get detected video.
-@app.get("/detection_video/{id}")
-async def get_detected_video(id: str):
+@app.get("/detection/{id}")
+async def get_detected(id: str):
     """Get the detected video for a specific id.
 
     :param id: ID of the Video in uuid.
@@ -211,7 +212,9 @@ async def get_detected_video(id: str):
     :return: Video with detected objects, marked via bounding box.
     :rtype: FileResponse
     """
-    return FileResponse(f"tmp_processed/{id}.mp4")
+    file = glob.glob(f"tmp_processed/{id}.*")[0]
+
+    return FileResponse(file)
 
 
 # get detected classes.

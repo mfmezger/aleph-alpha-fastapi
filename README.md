@@ -21,6 +21,7 @@ To use the Aleph Alpha AI you need to get a Token from the Aleph Alpha Team. The
 
 ## Initialize Pre Commit
 Only necessary for Development
+
 ```pip install pre-commit```
 
 ```pre-commit install```
@@ -35,5 +36,7 @@ If you open a Request press on try it out to test the service with your own data
 ![fastapi](ressources/fastapi.png?raw=true "FastAPI Doc GUI")
 
 After Selecting a Image you can press on execute to get the result.
-![](ressources/execute.png?raw=true "Title")
-The result is a UUID that can be used to get the video and detections with other requests.
+![Request](ressources/execute.png?raw=true "Execution of Request")
+The result is a UUID that can be used to get the video and detections with other requests. (Important: you need to remove the "" from the UUID)
+
+![results](ressources/result.png?raw=true "Results")
