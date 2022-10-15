@@ -13,7 +13,7 @@ from pydantic import BaseModel
 import pandas as pd
 
 from config import LogConfig
-from detection import detect_video, detect_single_image
+from detection import detect_video, detect_single_image, speech_to_text, initialize_models
 
 # initialize the Logging.
 dictConfig(LogConfig().dict())
@@ -30,6 +30,9 @@ os.makedirs("tmp_processed", exist_ok=True)
 os.makedirs("tmp_dict", exist_ok=True)
 
 logger.info("Starting Backend Service")
+
+# initialize the models from the hub.
+initialize_models()
 
 
 class NLPRequest(BaseModel):
@@ -95,6 +98,27 @@ def nlp(request: NLPRequest):
     result = model.qa(request)
 
     return result
+
+
+# speech to text service
+@app.post("/speech")
+def speech(file: UploadFile):
+    """Speech to Text Service
+
+    :param file: Audio file
+    :type file: Upload
+    """
+
+    logger.info("Starting Speech to Text Request")
+    # save the file
+    filename = f"tmp_raw/{uuid.uuid4()}.wav"
+    with open(filename, "wb") as buffer:
+        buffer.write(file.file.read())
+
+    # convert the file to text
+    text = speech_to_text(filename)
+
+    return text
 
 
 @app.post("/multimodal")
@@ -192,14 +216,6 @@ async def detection_video(file: UploadFile):
 
     # return the video id.
     return id
-
-
-# service to speech to text.
-@app.get("/speech_to_text/{id}")
-def speech_to_text(file: UploadFile):
-    # get the sound data and save it locally.
-    logger.info("Saving file locally.")
-    id = str(uuid.uuid4())
 
 
 # get detected video.

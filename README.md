@@ -10,6 +10,10 @@ To install the dependencies run:
 
 ```poetry install```
 
+To activate your poetry Venv run:
+
+```poetry shell```
+
 
 
 ## Use the API

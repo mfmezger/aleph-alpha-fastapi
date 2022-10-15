@@ -9,6 +9,16 @@ from PIL import Image
 from transformers import DetrFeatureExtractor, DetrForObjectDetection
 
 from config import LogConfig
+import nemo.collections.asr as nemo_asr
+
+
+def initialize_models():
+    """Initialize the models because of download constraigns."""
+
+    model = DetrFeatureExtractor.from_pretrained("facebook/detr-resnet-50")
+    del model
+    model = nemo_asr.models.ASRModel.from_pretrained("nvidia/stt_en_conformer_transducer_xlarge")
+    del model
 
 
 """Initializing the logger."""
@@ -70,7 +80,12 @@ def speech_to_text(path_to_sound):
     :return: the text from the video
     :rtype: str
     """
-    pass
+
+    asr_model = nemo_asr.models.ASRModel.from_pretrained("nvidia/stt_en_conformer_transducer_xlarge")
+
+    transcriptions = asr_model.transcribe([path_to_sound])
+
+    return transcriptions
 
 
 def detect_single_image(path_to_image, save_path, dict_path):
@@ -209,10 +224,11 @@ def main():
     # cv2.imwrite("cat_detected.jpg", img)
 
     # save image
-    path_to_video = "video.mp4"
-    save_path = "maverik.mp4"
-    dict_path = "tmp_dict/mav.json"
-    detect_video(path_to_video, save_path, dict_path)
+    # path_to_video = "video.mp4"
+    # save_path = "maverik.mp4"
+    # dict_path = "tmp_dict/mav.json"
+    # detect_video(path_to_video, save_path, dict_path)
+    asr_model = nemo_asr.models.ASRModel.from_pretrained("nvidia/stt_en_conformer_transducer_xlarge")
 
 
 if __name__ == "__main__":
