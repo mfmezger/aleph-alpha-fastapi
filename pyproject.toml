@@ -19,6 +19,7 @@ opencv-python = "^4.6.0.66"
 python-multipart = "^0.0.5"
 torch = "^1.12.1"
 pandas = "^1.5.0"
+pre-commit = "^2.20.0"
 
 
 [build-system]
