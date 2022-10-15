@@ -1,9 +1,0 @@
-fastapi
-uvicorn[standard]
-aleph-alpha-client
-python-dotenv
-timm
-transformers
-opencv-python
-python-multipart
-torch
