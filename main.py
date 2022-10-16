@@ -121,6 +121,22 @@ def speech(file: UploadFile):
     return text
 
 
+# get dict for a name.
+@app.get("/dict/{name}")
+def get_dict(name: str):
+    """Get the dict for a name
+
+    :param name: Name of the dict
+    :type name: str
+    :return: Dict for the name
+    :rtype: dict
+    """
+    logger.info("Starting Dict Request")
+    # load csv file and return as json.
+    df = pd.read_csv(f"tmp_dict/{name}.csv")
+    return df.to_json(orient="records")
+
+
 @app.post("/multimodal")
 # async def multimodal(request: MultimodalRequest):
 async def multimodal(file: UploadFile):
