@@ -9,7 +9,7 @@ from PIL import Image
 from transformers import DetrFeatureExtractor, DetrForObjectDetection
 
 from config import LogConfig
-import nemo.collections.asr as nemo_asr
+# import nemo.collections.asr as nemo_asr
 
 
 def initialize_models():
@@ -26,7 +26,7 @@ dictConfig(LogConfig().dict())
 logger = logging.getLogger("client")
 
 
-def draw_on_image(results, img, model, score_confidence=0.9, debugging=False):
+def draw_on_image(results, img, model, score_confidence=0.99, debugging=False):
     """Draws the bounding boxes on the image
 
     # future: check if speedup is possible / need for profiling.
@@ -224,11 +224,11 @@ def main():
     # cv2.imwrite("cat_detected.jpg", img)
 
     # save image
-    # path_to_video = "video.mp4"
-    # save_path = "maverik.mp4"
-    # dict_path = "tmp_dict/mav.json"
-    # detect_video(path_to_video, save_path, dict_path)
-    asr_model = nemo_asr.models.ASRModel.from_pretrained("nvidia/stt_en_conformer_transducer_xlarge")
+    path_to_video = "video.mp4"
+    save_path = "tiktok.mp4"
+    dict_path = "tiktok.json"
+    detect_video(path_to_video, save_path, dict_path)
+    #asr_model = nemo_asr.models.ASRModel.from_pretrained("nvidia/stt_en_conformer_transducer_xlarge")
 
 
 if __name__ == "__main__":

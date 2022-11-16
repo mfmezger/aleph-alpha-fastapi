@@ -3,7 +3,7 @@ import json
 import pandas as pd
 
 # load the json file
-with open("tmp_dict/maverik.json") as f:
+with open("tiktok.json") as f:
     data = json.load(f)
 
 # print the json file
@@ -22,4 +22,4 @@ for d in data:
 
 
 # save df
-df.to_csv("processed_maverik.csv", index=False)
+df.to_csv("processed_tiktok.csv", index=False)
