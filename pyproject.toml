@@ -5,7 +5,7 @@ description = ""
 authors = ["Marc Fabian Mezger <marc.mezger@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "aleph_alpha_fastapi"}]
+
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -26,6 +26,7 @@ braceexpand = "^0.1.7"
 webdataset = "^0.2.26"
 librosa = "^0.9.2"
 sentencepiece = "^0.1.97"
+cython = "^0.29.32"
 
 
 [build-system]

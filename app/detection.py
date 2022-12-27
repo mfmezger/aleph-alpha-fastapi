@@ -17,8 +17,8 @@ def initialize_models():
 
     model = DetrFeatureExtractor.from_pretrained("facebook/detr-resnet-50")
     del model
-    model = nemo_asr.models.ASRModel.from_pretrained("nvidia/stt_en_conformer_transducer_xlarge")
-    del model
+    #model = nemo_asr.models.ASRModel.from_pretrained("nvidia/stt_en_conformer_transducer_xlarge")
+    #del model
 
 
 """Initializing the logger."""

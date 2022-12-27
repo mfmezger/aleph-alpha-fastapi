@@ -13,7 +13,7 @@ from pydantic import BaseModel
 import pandas as pd
 
 from config import LogConfig
-from detection import detect_video, detect_single_image, speech_to_text, initialize_models
+from app.detection import detect_video, detect_single_image, speech_to_text, initialize_models
 
 # initialize the Logging.
 dictConfig(LogConfig().dict())
