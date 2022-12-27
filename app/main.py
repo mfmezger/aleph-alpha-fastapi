@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import io
 import uuid
 import glob
 from logging.config import dictConfig
@@ -20,6 +21,7 @@ dictConfig(LogConfig().dict())
 logger = logging.getLogger("client")
 config = dotenv_values(".env")
 
+token = ""
 # initialize the Fast API Application.
 app = FastAPI(debug=True)
 
@@ -276,8 +278,16 @@ async def get_detected_classes(id: str):
                 df.loc[y] = [y, number, x, p]
                 y += 1
 
-    # change to json.
-    return df.to_json(orient="records")
+    # sent as json file.
+    stream = io.StringIO()
+
+    df.to_csv(stream, index=False)
+
+    response = StreamingResponse(iter([stream.getvalue()]), media_type="text/csv")
+
+    response.headers["Content-Disposition"] = "attachment; filename=export.csv"
+
+    return response
 
 
 # get frame with the most detected objects.
@@ -305,3 +315,14 @@ async def get_detected_frame(id: str):
             frame = key
 
     return frame
+
+
+# create service to set the aleph alpha token.
+@app.post("/set_token")
+async def set_token(input_token: str):
+    """Set the Aleph Alpha Token.
+
+    :param token: Aleph Alpha Token
+    :type token: str
+    """
+    token = input_token
