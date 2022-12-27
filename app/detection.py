@@ -9,6 +9,7 @@ from PIL import Image
 from transformers import DetrFeatureExtractor, DetrForObjectDetection
 
 from config import LogConfig
+
 # import nemo.collections.asr as nemo_asr
 
 
@@ -17,8 +18,8 @@ def initialize_models():
 
     model = DetrFeatureExtractor.from_pretrained("facebook/detr-resnet-50")
     del model
-    #model = nemo_asr.models.ASRModel.from_pretrained("nvidia/stt_en_conformer_transducer_xlarge")
-    #del model
+    # model = nemo_asr.models.ASRModel.from_pretrained("nvidia/stt_en_conformer_transducer_xlarge")
+    # del model
 
 
 """Initializing the logger."""
@@ -228,7 +229,7 @@ def main():
     save_path = "tiktok.mp4"
     dict_path = "tiktok.json"
     detect_video(path_to_video, save_path, dict_path)
-    #asr_model = nemo_asr.models.ASRModel.from_pretrained("nvidia/stt_en_conformer_transducer_xlarge")
+    # asr_model = nemo_asr.models.ASRModel.from_pretrained("nvidia/stt_en_conformer_transducer_xlarge")
 
 
 if __name__ == "__main__":
