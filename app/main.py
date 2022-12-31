@@ -12,6 +12,7 @@ from aleph_alpha_client import AlephAlphaModel
 from aleph_alpha_client import Document
 from aleph_alpha_client import ImagePrompt
 from aleph_alpha_client import QaRequest
+from aleph_alpha_client import SummarizationRequest
 from dotenv import dotenv_values
 from fastapi import FastAPI
 from fastapi import UploadFile
@@ -32,7 +33,6 @@ dictConfig(LogConfig().dict())
 logger = logging.getLogger("client")
 config = dotenv_values(".env")
 
-token = ""
 # initialize the Fast API Application.
 app = FastAPI(debug=True)
 
@@ -90,6 +90,7 @@ def nlp(request: NLPRequest):
     :rtype: dict
     """
     logger.info("Starting NLP Request")
+
     # sent request to aleph alpha
     model = AlephAlphaModel(
         AlephAlphaClient(host="https://api.aleph-alpha.com", token=config["token"]),
@@ -109,6 +110,32 @@ def nlp(request: NLPRequest):
     )
 
     result = model.qa(request)
+
+    return result
+
+
+# request for summarization of a text.
+@app.post("/summarize")
+def summarize(request: str):
+    # sent request to aleph alpha
+    model = AlephAlphaModel(
+        AlephAlphaClient(host="https://api.aleph-alpha.com", token=config["token"]),
+        # You need to choose a model with qa support for this example.
+        model_name="luminous-extended",
+    )
+
+    # Build prompt
+
+    # important to remove all of the " and '. Otherwise the request will fail
+    # request = request.replace('"', "").replace("'", "")
+    logger.info("Request", request)
+    prompt = Document.from_text(request)
+
+    summ_req = SummarizationRequest(prompt)
+    logger.info("Prompt", prompt)
+
+    # call the summarize endpoint.
+    result = model.summarize(summ_req)
 
     return result
 
