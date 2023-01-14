@@ -6,7 +6,8 @@ from logging.config import dictConfig
 import cv2
 import torch
 from PIL import Image
-from transformers import DetrFeatureExtractor, DetrForObjectDetection
+from transformers import DetrFeatureExtractor
+from transformers import DetrForObjectDetection
 
 from config import LogConfig
 
@@ -85,6 +86,12 @@ def speech_to_text(path_to_sound):
     asr_model = nemo_asr.models.ASRModel.from_pretrained("nvidia/stt_en_conformer_transducer_xlarge")
 
     transcriptions = asr_model.transcribe([path_to_sound])
+
+    # save to tmp
+    # save the transcpription to a file
+    with open("transcription.txt", "w") as f:
+        # save the string to file
+        f.write(transcriptions)
 
     return transcriptions
 

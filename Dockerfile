@@ -22,4 +22,4 @@ RUN pip install timm
 # moving the complete app as well as the stored models into the docker workspace
 COPY ./app /app
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+ENTRYPOINT ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
