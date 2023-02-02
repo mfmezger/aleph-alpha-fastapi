@@ -1,3 +1,4 @@
+"""This is the detection module for the app."""
 import copy
 import json
 import logging
@@ -6,8 +7,7 @@ from logging.config import dictConfig
 import cv2
 import torch
 from PIL import Image
-from transformers import DetrFeatureExtractor
-from transformers import DetrForObjectDetection
+from transformers import DetrFeatureExtractor, DetrForObjectDetection
 
 from config import LogConfig
 
@@ -16,7 +16,6 @@ from config import LogConfig
 
 def initialize_models():
     """Initialize the models because of download constraigns."""
-
     model = DetrFeatureExtractor.from_pretrained("facebook/detr-resnet-50")
     del model
     # model = nemo_asr.models.ASRModel.from_pretrained("nvidia/stt_en_conformer_transducer_xlarge")
@@ -29,16 +28,16 @@ logger = logging.getLogger("client")
 
 
 def draw_on_image(results, img, model, score_confidence=0.99, debugging=False):
-    """Draws the bounding boxes on the image
+    """Draws the bounding boxes on the image.
 
     # future: check if speedup is possible / need for profiling.
 
-    :param results: the results from the model
-    :type results: dict of tensors
-    :param img: the image to draw on
-    :type img: cv2.Image
-    :param model: the model
-    :type model: model
+    :param results: the results from the model.
+    :type results: dict of tensors.
+    :param img: the image to draw on.
+    :type img: cv2.Image.
+    :param model: the model.
+    :type model: model.
     :param score_confidence: The confidence score that the model should reach to display the predictions, defaults to 0.9
     :type score_confidence: float, optional
     :param debugging: Debugging Mode with more prints, defaults to False
@@ -75,14 +74,13 @@ def draw_on_image(results, img, model, score_confidence=0.99, debugging=False):
 
 
 def speech_to_text(path_to_sound):
-    """Converts the sound of the video to text
+    """Convert the sound of the video to text.
 
     :param path_to_video: Path to the video
     :type path_to_video: str
     :return: the text from the video
     :rtype: str
     """
-
     asr_model = nemo_asr.models.ASRModel.from_pretrained("nvidia/stt_en_conformer_transducer_xlarge")
 
     transcriptions = asr_model.transcribe([path_to_sound])
@@ -97,7 +95,7 @@ def speech_to_text(path_to_sound):
 
 
 def detect_single_image(path_to_image, save_path, dict_path):
-    """Run a forward pass of the model on the image
+    """Run a forward pass of the model on the image.
 
     :param path_to_image: Parth to the image in the temporary folder
     :type path_to_image: str
@@ -140,7 +138,6 @@ def detect_video(path_to_video, save_path, dict_path):
     :param dict_path: Path to save the json file
     :type dict_path: str
     """
-
     # Create a VideoCapture object and read from input file
     # If the input is the camera, pass 0 instead of the video file name
     cap = cv2.VideoCapture(path_to_video)

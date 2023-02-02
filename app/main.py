@@ -1,3 +1,4 @@
+"""Entry Point for the API."""
 import glob
 import io
 import json
@@ -7,24 +8,26 @@ import uuid
 from logging.config import dictConfig
 
 import pandas as pd
-from aleph_alpha_client import AlephAlphaClient
-from aleph_alpha_client import AlephAlphaModel
-from aleph_alpha_client import Document
-from aleph_alpha_client import ImagePrompt
-from aleph_alpha_client import QaRequest
-from aleph_alpha_client import SummarizationRequest
+from aleph_alpha_client import (
+    AlephAlphaClient,
+    AlephAlphaModel,
+    Document,
+    ImagePrompt,
+    QaRequest,
+    SummarizationRequest,
+)
 from dotenv import dotenv_values
-from fastapi import FastAPI
-from fastapi import UploadFile
-from fastapi.responses import FileResponse
-from fastapi.responses import StreamingResponse
+from fastapi import FastAPI, UploadFile
+from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 
 from app.config import LogConfig
-from app.detection import detect_single_image
-from app.detection import detect_video
-from app.detection import initialize_models
-from app.detection import speech_to_text
+from app.detection import (
+    detect_single_image,
+    detect_video,
+    initialize_models,
+    speech_to_text,
+)
 
 # import streaming response
 
@@ -49,7 +52,7 @@ initialize_models()
 
 
 class NLPRequest(BaseModel):
-    """Using to standardize the NLP Request
+    """Using to standardize the NLP Request.
 
     :param BaseModel: Pydantic BaseModel
     :type BaseModel: pydantic.BaseModel
@@ -60,7 +63,7 @@ class NLPRequest(BaseModel):
 
 
 class MultimodalRequest(BaseModel):
-    """Using to standardize the Multimodel Request
+    """Using to standardize the Multimodel Request.
 
     :param BaseModel: Pydantic BaseModel
     :type BaseModel: pydantic.BaseModel
@@ -72,6 +75,11 @@ class MultimodalRequest(BaseModel):
 
 @app.get("/")
 def read_root():
+    """Root Message.
+
+    :return: Welcome Message
+    :rtype: string
+    """
     return "Welcome to the Simple Aleph Alpha FastAPI Backend!"
 
 
@@ -82,7 +90,7 @@ def read_root():
 
 @app.post("/nlp")
 def nlp(request: NLPRequest):
-    """QA Tool for Aleph Alpha
+    """QA Tool for Aleph Alpha.
 
     :param request: NLPRequest
     :type request: NLPRequest
@@ -117,6 +125,13 @@ def nlp(request: NLPRequest):
 # request for summarization of a text.
 @app.post("/summarize")
 def summarize(request: str):
+    """Summarize a text using the Aleph Alpha API SUmmarization Endpoint.
+
+    :param request: _description_
+    :type request: str
+    :return: _description_
+    :rtype: _type_
+    """
     # sent request to aleph alpha
     model = AlephAlphaModel(
         AlephAlphaClient(host="https://api.aleph-alpha.com", token=config["token"]),
@@ -143,12 +158,11 @@ def summarize(request: str):
 # speech to text service
 @app.post("/speech")
 def speech(file: UploadFile):
-    """Speech to Text Service
+    """Speech to Text Service.
 
     :param file: Audio file
     :type file: Upload
     """
-
     logger.info("Starting Speech to Text Request")
     # save the file
     filename = f"tmp_raw/{uuid.uuid4()}.wav"
@@ -164,7 +178,7 @@ def speech(file: UploadFile):
 # get dict for a name.
 @app.get("/dict/{name}")
 def get_dict(name: str):
-    """Get the dict for a name
+    """Get the dict for a name.
 
     :param name: Name of the dict
     :type name: str
@@ -218,6 +232,13 @@ async def multimodal(file: UploadFile):
 # detect image.
 @app.post("/detect_image")
 async def detect_image(file: UploadFile):
+    """This method detects Objects in an image that is uploaded.
+
+    :param file: Image file
+    :type file: UploadFile
+    :return: Id of the image
+    :rtype: int
+    """
     # get the image and save it locally.
     logger.info("Saving file locally.")
     id = str(uuid.uuid4())
@@ -299,7 +320,7 @@ async def get_detected_classes(id: str):
     :return: detected classes
     :rtype: dict
     """
-    with open(f"tmp_dict/{id}.json", "r") as f:
+    with open(f"tmp_dict/{id}.json") as f:
         data = f.read()
 
     data = json.loads(data)
@@ -338,7 +359,7 @@ async def get_detected_frame(id: str):
     :return: image with the most detected objects.
     :rtype: FileResponse
     """
-    with open(f"tmp_dict/{id}.json", "r") as f:
+    with open(f"tmp_dict/{id}.json") as f:
         file = f.read()
 
     file = json.loads(file)

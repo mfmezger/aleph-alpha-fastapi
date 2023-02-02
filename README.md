@@ -1,5 +1,5 @@
 <h1>FastAPI Backend for Object Detection, Speech to Text and Aleph Alpha Connection</h1>
-This is a Backend POC for a Backend that allows to use Object Detection on Videos and Images using the HuggingFace Transformers library. In Addition this Backend connects to the Aleph Alpha AI. The Backend is written in Python using the FastAPI Framework.
+This is a Backend POC for a Backend that allows to use Object Detection on Videos and Images using the HuggingFace Transformers library. Aditionally this Backend connects to the Aleph Alpha AI. The Backend is written in Python using the FastAPI Framework.
 
 ## Installation of Dependencies
 Conda/Miniconda is recommended. This Project uses poetry for dependency management. To install poetry run:
@@ -28,7 +28,7 @@ To use the Aleph Alpha AI you need to get a Token from the Aleph Alpha Team. The
 
 
 ## Initialize Pre Commit
-Only necessary for Development
+Necessary for Development
 
 ```pip install pre-commit```
 

@@ -7,9 +7,9 @@ services:
       - .env
     ports:
       - "8000:8000"
-    # volumes:
-    #   # mount the tmp folders to the host
-    #   - tmp_dict:/tmp_dict
-    #   - tmp_img:/tmp_img
-    #   - tmp_processed:/tmp_processed
-    #   - tmp_raw:/tmp_raw
+    volumes:
+      # mount the tmp folders to the host
+      - ./tmp_dict:/tmp_dict
+      - ./tmp_img:/tmp_img
+      - ./tmp_processed:/tmp_processed
+      - ./tmp_raw:/tmp_raw
