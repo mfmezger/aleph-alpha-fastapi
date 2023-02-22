@@ -13,7 +13,7 @@ RUN curl -sSL https://install.python-poetry.org/ | POETRY_HOME=/opt/poetry pytho
 # Copy using poetry.lock* in case it doesn't exist yet
 COPY ./pyproject.toml ./poetry.lock* /app/
 
-RUN apt-get update && apt-get install -y python3-opencv
+RUN apt-get update && apt-get install -y python3-opencv ffmpeg
 RUN poetry install --no-root --no-dev
 
 # installing the timm libary

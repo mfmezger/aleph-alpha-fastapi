@@ -1,10 +1,14 @@
 """In this file is used to converse the json file to a csv file."""
 import json
+import time
 
 import pandas as pd
 
+start = time.time()
+
+file = "LT1_conv_proc.json"
 # load the json file
-with open("tiktok.json") as f:
+with open(file) as f:
     data = json.load(f)
 
 # print the json file
@@ -23,4 +27,5 @@ for d in data:
 
 
 # save df
-df.to_csv("processed_tiktok.csv", index=False)
+df.to_csv(f"{file.split('.')[0]}.csv", index=False)
+print(f"Time: {time.time() - start}")

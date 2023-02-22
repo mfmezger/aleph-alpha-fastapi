@@ -27,7 +27,7 @@ webdataset = "^0.2.26"
 librosa = "^0.9.2"
 sentencepiece = "^0.1.97"
 cython = "^0.29.32"
-
+openai-whisper = "^20230124"
 
 [build-system]
 requires = ["poetry-core"]
@@ -35,4 +35,4 @@ build-backend = "poetry.core.masonry.api"
 
 
 [settings]
-known_third_party = ["PIL", "aleph_alpha_client", "cv2", "dotenv", "fastapi", "pandas", "pydantic", "torch", "transformers"]
+known_third_party = ["PIL", "aleph_alpha_client", "cv2", "dotenv", "fastapi", "pandas", "pydantic", "torch", "transformers", "whisper"]

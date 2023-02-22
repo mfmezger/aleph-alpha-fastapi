@@ -6,12 +6,11 @@ from logging.config import dictConfig
 
 import cv2
 import torch
+import whisper
 from PIL import Image
 from transformers import DetrFeatureExtractor, DetrForObjectDetection
 
 from config import LogConfig
-
-# import nemo.collections.asr as nemo_asr
 
 
 def initialize_models():
@@ -81,17 +80,17 @@ def speech_to_text(path_to_sound):
     :return: the text from the video
     :rtype: str
     """
-    asr_model = nemo_asr.models.ASRModel.from_pretrained("nvidia/stt_en_conformer_transducer_xlarge")
-
-    transcriptions = asr_model.transcribe([path_to_sound])
+    model = whisper.load_model("base")
+    options = whisper.DecodingOptions(language="de", without_timestamps=False)
+    result = model.transcribe(path_to_sound)
 
     # save to tmp
     # save the transcpription to a file
     with open("transcription.txt", "w") as f:
         # save the string to file
-        f.write(transcriptions)
+        f.write(result["text"])
 
-    return transcriptions
+    return result["text"]
 
 
 def detect_single_image(path_to_image, save_path, dict_path):
